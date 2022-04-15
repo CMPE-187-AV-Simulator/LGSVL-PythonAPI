@@ -77,9 +77,7 @@ ego.on_collision(on_collision)
 
 print(state.position)
 print(forward)
-signals = sim.get_controllables("signal")
-for signal in signals:
-    signal.control("green=3")
+
     
 sim.add_random_agents(lgsvl.AgentType.PEDESTRIAN)
 
@@ -99,7 +97,7 @@ print("Creating 120 pedestrians")
 for i in range(20 * 6):
     # Create peds in a block
     start = (
-        spawns[3].position + 150 * forward
+        spawns[3].position + 50 * forward
         + (5 + (1.0 * (i // 6))) * forward
         - (2 + (1.0 * (i % 6))) * right
     )

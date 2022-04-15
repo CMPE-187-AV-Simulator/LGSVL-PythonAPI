@@ -78,14 +78,16 @@ ego.on_collision(on_collision)
 print(state.position)
 print(forward)
 signals = sim.get_controllables("signal")
-for signal in signals:
-    signal.control("green=3")
+
     
 sim.add_random_agents(lgsvl.AgentType.PEDESTRIAN)
 
 sim.add_random_agents(lgsvl.AgentType.PEDESTRIAN)
 
 sim.add_random_agents(lgsvl.AgentType.PEDESTRIAN)
+sim.run(15)
+for signal in signals:
+    signal.control("green=3")
 # Dreamview setup Disabled
 '''
 print("Connecting to bridge...")

@@ -137,12 +137,12 @@ for i in range(20 * 2):
 
     Pstate = lgsvl.AgentState()
     Pstate.transform.position = start
-    Pstate.transform.rotation = spawns[0].rotation
+    Pstate.transform.rotation = spawns[1].rotation
     name = random.choice(names)
 
     # Send the waypoints and make the pedestrian loop over the waypoints
     p = sim.add_agent(name, lgsvl.AgentType.PEDESTRIAN, Pstate)
-    p.follow(wp, False)
+    p.walk_randomly(True)
 sim.run(20) 
 
 # Dreamview setup Disabled
@@ -164,7 +164,7 @@ modules = [
     'Traffic Light',
     'Control'
 ]
-destination = spawns[0].destinations[0]
+destination = spawns[1].destinations[0]
 dv.setup_apollo(destination.position.x, destination.position.z, modules)
 dv.disable_apollo()
 dv.setup_apollo(destination.position.x, destination.position.z, default_modules)

@@ -124,7 +124,7 @@ modules = [
     'Traffic Light',
     'Control'
 ]
-destination = spawns[0].destinations[0]
+destination = spawns[1].destinations[0]
 dv.setup_apollo(destination.position.x, destination.position.z, modules)
 dv.disable_apollo()
 dv.setup_apollo(destination.position.x, destination.position.z, default_modules)

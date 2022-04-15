@@ -58,7 +58,7 @@ else:
 
 
 # reset time of the day
-sim.set_date_time(datetime(2022, 4, 1, 19, 0, 0, 0), True)
+sim.set_date_time(datetime(2022, 4, 1, 21, 0, 0, 0), True)
 
 spawns = sim.get_spawn()
 
@@ -77,15 +77,17 @@ ego.on_collision(on_collision)
 
 print(state.position)
 print(forward)
-signals = sim.get_controllables("signal")
-for signal in signals:
-    signal.control("green=3")
+
     
 sim.add_random_agents(lgsvl.AgentType.PEDESTRIAN)
 
 sim.add_random_agents(lgsvl.AgentType.PEDESTRIAN)
 
 sim.add_random_agents(lgsvl.AgentType.PEDESTRIAN)
+sim.rum(15)
+signals = sim.get_controllables("signal")
+for signal in signals:
+    signal.control("green=3")
 # Dreamview setup Disabled
 '''
 print("Connecting to bridge...")
