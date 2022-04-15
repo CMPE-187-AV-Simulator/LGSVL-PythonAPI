@@ -12,7 +12,7 @@
 
 
 
-
+import random
 from datetime import datetime
 import lgsvl
 import sys
@@ -44,7 +44,7 @@ SIMULATOR_PORT = env.int("LGSVL__SIMULATOR_PORT", 8181)
 
 #LGSVL__AUTOPILOT_HD_MAP = env.str("LGSVL__AUTOPILOT_HD_MAP", "SanFrancisco")
 #LGSVL__AUTOPILOT_0_VEHICLE_CONFIG = env.str("LGSVL__AUTOPILOT_0_VEHICLE_CONFIG", 'Lincoln2017MKZ')
-LGSVL__SIMULATION_DURATION_SECS = 40.0
+LGSVL__SIMULATION_DURATION_SECS = 80.0
 LGSVL__RANDOM_SEED = env.int("LGSVL__RANDOM_SEED", 51472)
 
 vehicle_conf = env.str("LGSVL__VEHICLE_0", '99270b72-b957-47b0-af0d-7fdc92ddb384')
@@ -61,13 +61,14 @@ except Exception:
 
 
 # reset time of the day
-sim.set_date_time(datetime(2022, 4, 1, 9, 0, 0, 0), True)
+sim.set_date_time(datetime(2022, 4, 1, 19, 0, 0, 0), True)
 
 spawns = sim.get_spawn()
 
 state = lgsvl.AgentState()
-state.transform = spawns[0]
+state.transform = spawns[3]
 forward = lgsvl.utils.transform_to_forward(state.transform)
+right = lgsvl.utils.transform_to_right(state.transform)
 print("Loading vehicle {}...".format(vehicle_conf))
 ego = sim.add_agent(vehicle_conf, lgsvl.AgentType.EGO, state)
 
@@ -79,27 +80,15 @@ ego.on_collision(on_collision)
 
 print(state.position)
 print(forward)
+signals = sim.get_controllables("signal")
+for signal in signals:
+    signal.control("green=3")
+    
+sim.add_random_agents(lgsvl.AgentType.PEDESTRIAN)
 
-POVList = []
+sim.add_random_agents(lgsvl.AgentType.PEDESTRIAN)
 
-POV1State = lgsvl.AgentState()
-POV1State.transform = sim.map_point_on_lane(state.position + (20) * forward)
-POV1 = sim.add_agent("Sedan", lgsvl.AgentType.NPC, POV1State)
-POV1.on_collision(on_collision)
-POVList.append(POV1)
-
-POV2State = lgsvl.AgentState()
-POV2State.transform = sim.map_point_on_lane(state.position + (30) * forward)
-POV2 = sim.add_agent("Sedan", lgsvl.AgentType.NPC, POV2State)
-POV2.on_collision(on_collision)
-POVList.append(POV2)
-
-POV3State = lgsvl.AgentState()
-POV3State.transform = sim.map_point_on_lane(state.position + (10) * forward)
-POV3 = sim.add_agent("SUV", lgsvl.AgentType.NPC, POV3State)
-POV3.on_collision(on_collision)
-POVList.append(POV3)
-
+sim.add_random_agents(lgsvl.AgentType.PEDESTRIAN)
 # Dreamview setup Disabled
 '''
 print("Connecting to bridge...")
@@ -126,6 +115,4 @@ dv.setup_apollo(destination.position.x, destination.position.z, default_modules)
 '''
 
 sim.run(LGSVL__SIMULATION_DURATION_SECS)
-sim.stop()
-sim.close()
 

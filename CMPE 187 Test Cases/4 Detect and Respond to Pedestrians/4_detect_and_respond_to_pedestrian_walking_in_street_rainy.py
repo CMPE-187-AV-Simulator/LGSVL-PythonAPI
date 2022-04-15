@@ -12,7 +12,7 @@
 
 
 
-
+import random
 from datetime import datetime
 import lgsvl
 import sys
@@ -44,7 +44,7 @@ SIMULATOR_PORT = env.int("LGSVL__SIMULATOR_PORT", 8181)
 
 #LGSVL__AUTOPILOT_HD_MAP = env.str("LGSVL__AUTOPILOT_HD_MAP", "SanFrancisco")
 #LGSVL__AUTOPILOT_0_VEHICLE_CONFIG = env.str("LGSVL__AUTOPILOT_0_VEHICLE_CONFIG", 'Lincoln2017MKZ')
-LGSVL__SIMULATION_DURATION_SECS = 40.0
+LGSVL__SIMULATION_DURATION_SECS = 80.0
 LGSVL__RANDOM_SEED = env.int("LGSVL__RANDOM_SEED", 51472)
 
 vehicle_conf = env.str("LGSVL__VEHICLE_0", '99270b72-b957-47b0-af0d-7fdc92ddb384')
@@ -66,8 +66,9 @@ sim.set_date_time(datetime(2022, 4, 1, 9, 0, 0, 0), True)
 spawns = sim.get_spawn()
 
 state = lgsvl.AgentState()
-state.transform = spawns[0]
+state.transform = spawns[3]
 forward = lgsvl.utils.transform_to_forward(state.transform)
+right = lgsvl.utils.transform_to_right(state.transform)
 print("Loading vehicle {}...".format(vehicle_conf))
 ego = sim.add_agent(vehicle_conf, lgsvl.AgentType.EGO, state)
 
@@ -79,27 +80,46 @@ ego.on_collision(on_collision)
 
 print(state.position)
 print(forward)
+signals = sim.get_controllables("signal")
+for signal in signals:
+    signal.control("green=3")
+    
+sim.add_random_agents(lgsvl.AgentType.PEDESTRIAN)
 
-POVList = []
+names = [
+    "Bob",
+    "EntrepreneurFemale",
+    "Howard",
+    "Johny",
+    "Pamela",
+    "Presley",
+    "Robin",
+    "Stephen",
+    "Zoe",
+]
 
-POV1State = lgsvl.AgentState()
-POV1State.transform = sim.map_point_on_lane(state.position + (20) * forward)
-POV1 = sim.add_agent("Sedan", lgsvl.AgentType.NPC, POV1State)
-POV1.on_collision(on_collision)
-POVList.append(POV1)
+print("Creating 120 pedestrians")
+for i in range(20 * 6):
+    # Create peds in a block
+    start = (
+        spawns[3].position + 150 * forward
+        + (5 + (1.0 * (i // 6))) * forward
+        - (2 + (1.0 * (i % 6))) * right
+    )
+    end = start + 10 * forward
 
-POV2State = lgsvl.AgentState()
-POV2State.transform = sim.map_point_on_lane(state.position + (30) * forward)
-POV2 = sim.add_agent("Sedan", lgsvl.AgentType.NPC, POV2State)
-POV2.on_collision(on_collision)
-POVList.append(POV2)
+    # Give waypoints for the spawn location and 10m ahead
+    wp = [lgsvl.WalkWaypoint(start, 0), lgsvl.WalkWaypoint(end, 0)]
 
-POV3State = lgsvl.AgentState()
-POV3State.transform = sim.map_point_on_lane(state.position + (10) * forward)
-POV3 = sim.add_agent("SUV", lgsvl.AgentType.NPC, POV3State)
-POV3.on_collision(on_collision)
-POVList.append(POV3)
+    state = lgsvl.AgentState()
+    state.transform.position = start
+    state.transform.rotation = spawns[3].rotation
+    name = random.choice(names)
 
+    # Send the waypoints and make the pedestrian loop over the waypoints
+    p = sim.add_agent(name, lgsvl.AgentType.PEDESTRIAN, state)
+    # Pedestrian will walk to a random point on sidewalk
+    p.walk_randomly(True)
 # Dreamview setup Disabled
 '''
 print("Connecting to bridge...")
@@ -126,6 +146,4 @@ dv.setup_apollo(destination.position.x, destination.position.z, default_modules)
 '''
 
 sim.run(LGSVL__SIMULATION_DURATION_SECS)
-sim.stop()
-sim.close()
 

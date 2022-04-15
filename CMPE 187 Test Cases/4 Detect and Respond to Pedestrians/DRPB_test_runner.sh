@@ -2,11 +2,11 @@
 
 set -eu
 
+python3 4_detect_and_respond_to_pedestrian_crossing_red.py
+python3 4_detect_and_respond_to_pedestrian_crossing_red_night.py
 python3 4_detect_and_respond_to_pedestrian_walking_in_street.py
-python3 4_detect_and_respond_to_pedestrian_crossing.py
-python3 4_detect_and_respond_to_bicyclist.py
-python3 4_detect_and_respond_to_bicyclist_night.py
+python3 4_detect_and_respond_to_pedestrian_walking_in_street_rainy.py
+# python3 4_detect_and_respond_to_pedestrian_crossing_red.py
+# python3 4_detect_and_respond_to_pedestrian_crossing_red_night.py
 # python3 4_detect_and_respond_to_pedestrian_walking_in_street.py
-# python3 4_detect_and_respond_to_pedestrian_crossing.py
-# python3 4_detect_and_respond_to_bicyclist.py
-# python3 4_detect_and_respond_to_bicyclist_night.py
+# python3 4_detect_and_respond_to_pedestrian_walking_in_street_rainy.py
