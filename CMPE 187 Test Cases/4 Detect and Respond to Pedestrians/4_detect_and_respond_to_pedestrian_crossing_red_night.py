@@ -50,14 +50,11 @@ LGSVL__RANDOM_SEED = env.int("LGSVL__RANDOM_SEED", 51472)
 vehicle_conf = env.str("LGSVL__VEHICLE_0", '99270b72-b957-47b0-af0d-7fdc92ddb384')
 scene_name = env.str("LGSVL__MAP", lgsvl.wise.DefaultAssets.map_sanfrancisco)
 sim = lgsvl.Simulator(SIMULATOR_HOST, SIMULATOR_PORT)
-try:
-    print("Loading map {}...".format(scene_name))
-    sim.load(scene_name) # laod map with random seed
-except Exception:
-    if sim.current_scene == scene_name:
-        sim.reset()
-    else:
-        sim.load(scene_name)
+print("Loading map {}...".format(scene_name))
+if sim.current_scene == scene_name:
+    sim.reset()
+else:
+    sim.load(scene_name)
 
 
 # reset time of the day
