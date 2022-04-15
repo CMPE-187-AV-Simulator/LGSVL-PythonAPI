@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -eu
+
+python3 3_detect_and_respond_to_school_bus_drop_off.py
+python3 3_detect_and_respond_to_school_bus_encroaching.py
+python3 3_detect_and_respond_to_school_bus_encroaching_raining.py
+python3 3_detect_and_respond_to_school_bus_run_red.py
+# python3 3_detect_and_respond_to_school_bus_drop_off.py
+# python3 3_detect_and_respond_to_school_bus_encroaching.py
+# python3 3_detect_and_respond_to_school_bus_encroaching_raining.py
+# python3 3_detect_and_respond_to_school_bus_run_red.py

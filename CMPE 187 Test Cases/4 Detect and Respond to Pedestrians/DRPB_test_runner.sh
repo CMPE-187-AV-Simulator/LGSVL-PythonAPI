@@ -1,0 +1,12 @@
+#!/bin/sh
+
+set -eu
+
+python3 4_detect_and_respond_to_pedestrian_walking_in_street.py
+python3 4_detect_and_respond_to_pedestrian_crossing.py
+python3 4_detect_and_respond_to_bicyclist.py
+python3 4_detect_and_respond_to_bicyclist_night.py
+# python3 4_detect_and_respond_to_pedestrian_walking_in_street.py
+# python3 4_detect_and_respond_to_pedestrian_crossing.py
+# python3 4_detect_and_respond_to_bicyclist.py
+# python3 4_detect_and_respond_to_bicyclist_night.py

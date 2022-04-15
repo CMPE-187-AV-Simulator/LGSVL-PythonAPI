@@ -74,7 +74,7 @@ sim.set_date_time(datetime(2022, 4, 1, 9, 0, 0, 0), True)
 spawns = sim.get_spawn()
 
 state = lgsvl.AgentState()
-state.transform = spawns[2]
+state.transform = spawns[1]
 forward = lgsvl.utils.transform_to_forward(state.transform)
 right = lgsvl.utils.transform_to_right(state.transform)
 print("Loading vehicle {}...".format(vehicle_conf))
@@ -91,20 +91,31 @@ print(forward)
 
 POVState = lgsvl.AgentState()
 POVState.transform = sim.map_point_on_lane(state.position + 50 * forward)
-POV = sim.add_agent("Sedan", lgsvl.AgentType.NPC, POVState)
+POV = sim.add_agent("SchoolBus", lgsvl.AgentType.NPC, POVState)
 
 POV.on_collision(on_collision)
-
+print("adding npcs")
+sim.add_random_agents(lgsvl.AgentType.NPC)
+sim.add_random_agents(lgsvl.AgentType.PEDESTRIAN)
 endOfRoad = state.position + 200 * forward
+# Set all the traffic lights to green.
+# It is possible to set only the lights visible by the EGO to green, but positions of the lights must be known
+signals = sim.get_controllables("signal")
+for signal in signals:
+    signal.control("green=3")
 # NPC will follow the HD map at a max speed of 11.176 m/s (25 mph)
 POV.follow_closest_lane(follow=True, max_speed=11.176)
 
-# Run Simulation for 10 seconds
-sim.run(10)
+# Run Simulation for 3 seconds
+sim.run(3)
 
 # Force the NPC to come to a stop
 control = lgsvl.NPCControl()
 control.e_stop = True
+
+POV.apply_control(control)
+
+sim.run(20) 
 
 # Dreamview setup Disabled
 '''
@@ -160,15 +171,7 @@ except lgsvl.evaluator.TestException as e:
     exit("FAILED: {}".format(e))
 
 separation = lgsvl.evaluator.separation(egoCurrentState.position, POVCurrentState.position)
-try:
-    if separation > MAX_FOLLOWING_DISTANCE:
-        raise lgsvl.evaluator.TestException(
-            "FAILED: EGO following distance was not maintained, {} > {}".format(separation, MAX_FOLLOWING_DISTANCE)
-        )
-    else:
-        print("PASSED")
-except lgsvl.evaluator.TestException as e:
-    exit("FAILED: {}".format(e))
+
 sim.run(LGSVL__SIMULATION_DURATION_SECS)
 sim.stop()
 sim.close()

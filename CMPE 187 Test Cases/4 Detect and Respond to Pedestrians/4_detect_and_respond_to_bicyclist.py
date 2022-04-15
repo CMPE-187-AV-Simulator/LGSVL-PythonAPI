@@ -12,7 +12,7 @@
 
 
 
-import time
+
 from datetime import datetime
 import lgsvl
 import sys
@@ -34,14 +34,6 @@ LGSVL__VEHICLE_0                    ID of EGO vehicle to be loaded in Simulator
 '''
 
 env = Env()
-
-MAX_EGO_SPEED = 11.18  # (40 km/h, 25 mph)
-SPEED_VARIANCE = 10  # Simple Physics does not return an accurate value
-MAX_POV_SPEED = 8.94  # (32 km/h, 20 mph)
-MAX_POV_ROTATION = 5  # deg/s
-TIME_LIMIT = 30  # seconds
-TIME_DELAY = 5
-MAX_FOLLOWING_DISTANCE = 100  # Apollo 3.5 is very cautious
 
 SIMULATOR_HOST = env.str("LGSVL__SIMULATOR_HOST", "127.0.0.1")
 SIMULATOR_PORT = env.int("LGSVL__SIMULATOR_PORT", 8181)
@@ -74,9 +66,8 @@ sim.set_date_time(datetime(2022, 4, 1, 9, 0, 0, 0), True)
 spawns = sim.get_spawn()
 
 state = lgsvl.AgentState()
-state.transform = spawns[2]
+state.transform = spawns[0]
 forward = lgsvl.utils.transform_to_forward(state.transform)
-right = lgsvl.utils.transform_to_right(state.transform)
 print("Loading vehicle {}...".format(vehicle_conf))
 ego = sim.add_agent(vehicle_conf, lgsvl.AgentType.EGO, state)
 
@@ -89,43 +80,25 @@ ego.on_collision(on_collision)
 print(state.position)
 print(forward)
 
-POVState = lgsvl.AgentState()
-POVState.transform = sim.map_point_on_lane(state.position + 50 * forward)
-POV = sim.add_agent("Sedan", lgsvl.AgentType.NPC, POVState)
+POVList = []
 
-POV.on_collision(on_collision)
-print("adding npcs")
-sim.add_random_agents(lgsvl.AgentType.NPC)
-sim.add_random_agents(lgsvl.AgentType.PEDESTRIAN)
+POV1State = lgsvl.AgentState()
+POV1State.transform = sim.map_point_on_lane(state.position + (20) * forward)
+POV1 = sim.add_agent("Sedan", lgsvl.AgentType.NPC, POV1State)
+POV1.on_collision(on_collision)
+POVList.append(POV1)
 
-endOfRoad = state.position + 200 * forward
-# NPC will follow the HD map at a max speed of 11.176 m/s (25 mph)
-POV.follow_closest_lane(follow=True, max_speed=11.176)
+POV2State = lgsvl.AgentState()
+POV2State.transform = sim.map_point_on_lane(state.position + (30) * forward)
+POV2 = sim.add_agent("Sedan", lgsvl.AgentType.NPC, POV2State)
+POV2.on_collision(on_collision)
+POVList.append(POV2)
 
-# Run Simulation for 10 seconds
-sim.run(10)
-
-# Force the NPC to come to a stop
-control = lgsvl.NPCControl()
-control.e_stop = True
-
-POV.follow_closest_lane(follow=True, max_speed=11.176)
-# Run Simulation for 10 seconds
-sim.run(10)
-
-# Force the NPC to come to a stop
-control = lgsvl.NPCControl()
-control.e_stop = True
-
-POV.follow_closest_lane(follow=True, max_speed=11.176)
-# Run Simulation for 10 seconds
-sim.run(10)
-
-# Force the NPC to come to a stop
-control = lgsvl.NPCControl()
-control.e_stop = True
-POV.follow_closest_lane(follow=True, max_speed=11.176)
-
+POV3State = lgsvl.AgentState()
+POV3State.transform = sim.map_point_on_lane(state.position + (10) * forward)
+POV3 = sim.add_agent("SUV", lgsvl.AgentType.NPC, POV3State)
+POV3.on_collision(on_collision)
+POVList.append(POV3)
 
 # Dreamview setup Disabled
 '''
@@ -151,45 +124,7 @@ dv.setup_apollo(destination.position.x, destination.position.z, modules)
 dv.disable_apollo()
 dv.setup_apollo(destination.position.x, destination.position.z, default_modules)
 '''
-try:
-    t0 = time.time()
-    sim.run(TIME_DELAY)  # The EGO should start moving first
-    POV.follow_closest_lane(True, MAX_POV_SPEED, False)
-    while True:
-        sim.run(0.5)
-        egoCurrentState = ego.state
-        if egoCurrentState.speed > MAX_EGO_SPEED + SPEED_VARIANCE:
-            raise lgsvl.evaluator.TestException(
-                "Ego speed exceeded limit, {} > {} m/s".format(egoCurrentState.speed, MAX_EGO_SPEED + SPEED_VARIANCE)
-            )
-        POVCurrentState = POV.state
-        if POVCurrentState.speed > MAX_POV_SPEED + SPEED_VARIANCE:
-            raise lgsvl.evaluator.TestException(
-                "POV speed exceeded limit, {} > {} m/s".format(POVCurrentState.speed, MAX_POV_SPEED + SPEED_VARIANCE)
-            )
-        if POVCurrentState.angular_velocity.y > MAX_POV_ROTATION:
-            raise lgsvl.evaluator.TestException(
-                "POV angular rotation exceeded limit, {} > {} deg/s".format(
-                    POVCurrentState.angular_velocity, MAX_POV_ROTATION
-                )
-            )
-        if lgsvl.evaluator.separation(POVCurrentState.position, endOfRoad) < 5:
-            break
-        if time.time() - t0 > TIME_LIMIT:
-            break
-except lgsvl.evaluator.TestException as e:
-    exit("FAILED: {}".format(e))
 
-separation = lgsvl.evaluator.separation(egoCurrentState.position, POVCurrentState.position)
-try:
-    if separation > MAX_FOLLOWING_DISTANCE:
-        raise lgsvl.evaluator.TestException(
-            "FAILED: EGO following distance was not maintained, {} > {}".format(separation, MAX_FOLLOWING_DISTANCE)
-        )
-    else:
-        print("PASSED")
-except lgsvl.evaluator.TestException as e:
-    exit("FAILED: {}".format(e))
 sim.run(LGSVL__SIMULATION_DURATION_SECS)
 sim.stop()
 sim.close()
