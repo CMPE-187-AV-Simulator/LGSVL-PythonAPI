@@ -83,7 +83,7 @@ ego = sim.add_agent(vehicle_conf, lgsvl.AgentType.EGO, state)
 #Raise 
 def on_collision(agent1, agent2, contact):
     raise Exception("{} collided with {}".format(agent1, agent2))
-    sys.exit()
+    sim.stop()
 ego.on_collision(on_collision)
 
 print(state.position)
@@ -172,38 +172,6 @@ dv.setup_apollo(destination.position.x, destination.position.z, modules)
 dv.disable_apollo()
 dv.setup_apollo(destination.position.x, destination.position.z, default_modules)
 '''
-try:
-    t0 = time.time()
-    sim.run(TIME_DELAY)  # The EGO should start moving first
-    POV.follow_closest_lane(True, MAX_POV_SPEED, False)
-    while True:
-        sim.run(0.5)
-        egoCurrentState = ego.state
-        if egoCurrentState.speed > MAX_EGO_SPEED + SPEED_VARIANCE:
-            raise lgsvl.evaluator.TestException(
-                "Ego speed exceeded limit, {} > {} m/s".format(egoCurrentState.speed, MAX_EGO_SPEED + SPEED_VARIANCE)
-            )
-        POVCurrentState = POV.state
-        if POVCurrentState.speed > MAX_POV_SPEED + SPEED_VARIANCE:
-            raise lgsvl.evaluator.TestException(
-                "POV speed exceeded limit, {} > {} m/s".format(POVCurrentState.speed, MAX_POV_SPEED + SPEED_VARIANCE)
-            )
-        if POVCurrentState.angular_velocity.y > MAX_POV_ROTATION:
-            raise lgsvl.evaluator.TestException(
-                "POV angular rotation exceeded limit, {} > {} deg/s".format(
-                    POVCurrentState.angular_velocity, MAX_POV_ROTATION
-                )
-            )
-        if lgsvl.evaluator.separation(POVCurrentState.position, endOfRoad) < 5:
-            break
-        if time.time() - t0 > TIME_LIMIT:
-            break
-except lgsvl.evaluator.TestException as e:
-    exit("FAILED: {}".format(e))
-
-separation = lgsvl.evaluator.separation(egoCurrentState.position, POVCurrentState.position)
 
 sim.run(LGSVL__SIMULATION_DURATION_SECS)
-sim.stop()
-sim.close()
 

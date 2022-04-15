@@ -44,7 +44,7 @@ SIMULATOR_PORT = env.int("LGSVL__SIMULATOR_PORT", 8181)
 
 #LGSVL__AUTOPILOT_HD_MAP = env.str("LGSVL__AUTOPILOT_HD_MAP", "SanFrancisco")
 #LGSVL__AUTOPILOT_0_VEHICLE_CONFIG = env.str("LGSVL__AUTOPILOT_0_VEHICLE_CONFIG", 'Lincoln2017MKZ')
-LGSVL__SIMULATION_DURATION_SECS = 40.0
+LGSVL__SIMULATION_DURATION_SECS = 60.0
 LGSVL__RANDOM_SEED = env.int("LGSVL__RANDOM_SEED", 51472)
 
 vehicle_conf = env.str("LGSVL__VEHICLE_0", '99270b72-b957-47b0-af0d-7fdc92ddb384')
@@ -126,6 +126,5 @@ dv.setup_apollo(destination.position.x, destination.position.z, default_modules)
 '''
 
 sim.run(LGSVL__SIMULATION_DURATION_SECS)
-sim.stop()
-sim.close()
+
 
